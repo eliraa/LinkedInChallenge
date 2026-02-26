@@ -9,3 +9,6 @@ npm-debug.log
 .env
 /playwright/.auth/
 /playwright/.auth/*.json
+/.auth/*.json
+!/playwright/.auth/
+!/playwright/.auth/*.json

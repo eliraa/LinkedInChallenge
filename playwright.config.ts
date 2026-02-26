@@ -49,29 +49,52 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    {
-      name: "setup",
-      testMatch: /.*\.setup\.ts/,
-    },
-    {
-      name: "chromium",
-      dependencies: ["setup"],
-      use: {
-        ...devices["Desktop Chrome"],
-        permissions: ["clipboard-read"],
-      },
-    },
-    // {
-    //   name: 'firefox',
-    //   dependencies: ["setup"],
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
+  // Setup runs ONLY the auth setup file (now located under Login/)
+  {
+    name: "setup",
+    testMatch: /Login[\\/]+auth\.setup\.ts/,
+  },
 
-    {
-      name: 'webkit',
-      dependencies: ["setup"],
-      use: { ...devices['Desktop Safari'] },
+  // Guest-only: run everything EXCEPT auth.setup.ts and logged-only specs
+  {
+    name: "chromium",
+    testIgnore: [
+      /auth\.setup\.ts/,
+      /checkout\.spec\.ts/, // logged-only test (authenticated checkout)
+    ],
+    use: {
+      ...devices["Desktop Chrome"],
     },
+  },
+
+  // Auth-only: run everything EXCEPT auth.setup.ts and guest-only specs
+  {
+    name: "chromium-auth",
+    dependencies: ["setup"],
+    testIgnore: [
+      /auth\.setup\.ts/,
+      /checkoutGuest\.spec\.ts/, // guest-only test
+    ],
+    use: {
+      ...devices["Desktop Chrome"],
+      storageState: ".auth/customer.json",
+    },
+  },
+
+  // Optional: if you still want webkit to run authenticated suite
+  {
+    name: "webkit",
+    dependencies: ["setup"],
+    testIgnore: [
+      /auth\.setup\.ts/,
+      /checkoutGuest\.spec\.ts/,
+    ],
+    use: {
+      ...devices["Desktop Safari"],
+      storageState: ".auth/customer.json",
+    },
+  },
+
 
     /* Test against mobile viewports. */
     // {

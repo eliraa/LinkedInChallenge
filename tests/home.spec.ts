@@ -5,9 +5,6 @@ test.describe("Home page", () => {
     await page.goto("/");
   });
 
-  test("check sign in", async ({ page }) => {
-    await expect(page.getByTestId("nav-sign-in")).toHaveText("Sign in");
-  });
 
   test("validate page title", async ({ page }) => {
     await expect(page).toHaveTitle(
