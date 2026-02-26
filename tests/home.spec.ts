@@ -1,9 +1,10 @@
-import { test, expect } from "@playwright/test";
+﻿import { test, expect } from "@playwright/test";
 
 test.describe("Home page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("https://practicesoftwaretesting.com/");
+    await page.goto("/");
   });
+
   test("check sign in", async ({ page }) => {
     await expect(page.getByTestId("nav-sign-in")).toHaveText("Sign in");
   });

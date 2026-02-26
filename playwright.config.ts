@@ -1,12 +1,17 @@
-import { defineConfig, devices } from "@playwright/test";
+﻿import { defineConfig, devices } from "@playwright/test";
+import { loadEnvFile } from "./env";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+loadEnvFile();
+
+const activeEnvironment = process.env.TEST_ENV ?? "staging";
+
+const environmentBaseUrls: Record<string, string> = {
+  local: process.env.BASE_URL_LOCAL ?? "http://localhost:4200",
+  staging: process.env.BASE_URL_STAGING ?? "https://practicesoftwaretesting.com",
+};
+
+const selectedBaseUrl =
+  environmentBaseUrls[activeEnvironment] ?? environmentBaseUrls.staging;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -14,6 +19,9 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   timeout: 30_000,
   globalTimeout: 10 * 60 * 1000,
+  expect: {
+    timeout: 10_000,
+  },
   testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -24,11 +32,11 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  reporter: [["html"], ["list"]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "https://practicesoftwaretesting.com",
+    baseURL: selectedBaseUrl,
     testIdAttribute: "data-test",
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on",
@@ -48,7 +56,10 @@ export default defineConfig({
     {
       name: "chromium",
       dependencies: ["setup"],
-      use: { ...devices["Desktop Chrome"], permissions: ["clipboard-read"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        permissions: ["clipboard-read"],
+      },
     },
     // {
     //   name: 'firefox',
@@ -56,11 +67,11 @@ export default defineConfig({
     //   use: { ...devices['Desktop Firefox'] },
     // },
 
-    // {
-    //   name: 'webkit',
-    //   dependencies: ["setup"],
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'webkit',
+      dependencies: ["setup"],
+      use: { ...devices['Desktop Safari'] },
+    },
 
     /* Test against mobile viewports. */
     // {
@@ -90,3 +101,4 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 });
+
